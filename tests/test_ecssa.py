@@ -13,7 +13,7 @@ import unittest
 from hashlib import sha256 as hf
 
 from btclib.numbertheory import legendre_symbol
-from btclib.ec import pointMult
+from btclib.ec import Point, pointMult
 from btclib.ecurves import secp256k1, secp224k1, low_card_curves
 from btclib.ecutils import octets2point, point2octets, bits2int
 from btclib.rfc6979 import rfc6979
@@ -174,7 +174,7 @@ class TestEcssa(unittest.TestCase):
         self.assertFalse(_ecssa_verify(ec, hf, msg, pub, sig))
 
         # new proposed test: P = infinite
-        pub = 1, 0
+        pub = Point()
         msg = bytes.fromhex("5E2D58D8B3BCDF1ABADEC7829054F90DDA9805AAB56C77333024B9D0A508B75C")
         sig = (0x00DA9B08172A9B6F0466A2DEFD817F2D7AB437E0D253CB5395A963866B3574BE,
                0x00880371D01766935B92D2AB4CD5C8A2A5837EC57FED7660773A05F0DE142380)

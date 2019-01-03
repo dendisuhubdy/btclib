@@ -12,7 +12,7 @@ import unittest
 from hashlib import sha256
 
 from btclib.numbertheory import mod_inv
-from btclib.ec import _jac_from_aff, pointMult, DblScalarMult
+from btclib.ec import Point, _jac_from_aff, pointMult, DblScalarMult
 from btclib.ecurves import secp256k1, secp112r2, low_card_curves
 from btclib.ecutils import octets2point
 from btclib.ecdsa import to_dsasig, ecdsa_sign, _ecdsa_sign, ecdsa_verify, \
@@ -69,8 +69,8 @@ class TestEcdsa(unittest.TestCase):
         self.assertRaises(ValueError, to_dsasig, ec, invalid_dassig)
 
         # pubkey = Inf
-        self.assertRaises(ValueError, _ecdsa_verify, ec, hf, msg, (1, 0), sig)
-        #_ecdsa_verify(ec, hf, msg, (1, 0), sig)
+        self.assertRaises(ValueError, _ecdsa_verify, ec, hf, msg, Point(), sig)
+        #_ecdsa_verify(ec, hf, msg, Point(), sig)
 
 
     def test_forge_hash_sig(self):

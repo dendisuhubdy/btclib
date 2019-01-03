@@ -16,21 +16,26 @@ TODO: document duck-typing and static typing design choices
 
 from hashlib import sha256
 from math import sqrt
-from typing import Tuple
+from typing import NamedTuple
 
 from btclib.numbertheory import mod_inv, mod_sqrt, legendre_symbol
 
-# infinity point is (int, 0), checked with 'Inf[1] == 0'
-Point = Tuple[int, int]
+# infinity point is Point(int, 0), checked with 'Inf.y == 0'
+class Point(NamedTuple):
+    x: int = 1
+    y: int = 0
 
-# infinity point is (int, int, 0), checked with 'Inf[2] == 0'
-_JacPoint = Tuple[int, int, int]
+# infinity point is _JacPoint(int, int, 0), checked with 'Inf.z == 0'
+class _JacPoint(NamedTuple):
+    x: int = 1
+    y: int = 1
+    z: int = 0
 
 def _jac_from_aff(Q: Point) -> _JacPoint:
     # point is assumed to be on curve
     if Q[1] == 0:  # Infinity point in affine coordinates
-        return 1, 1, 0
-    return Q[0], Q[1], 1
+        return _JacPoint()
+    return _JacPoint(Q[0], Q[1], 1)
 
 
 # elliptic curve y^2 = x^3 + a*x + b
@@ -91,7 +96,7 @@ class EC:
             raise ValueError("Generator must a be a Tuple[int, int]")
         if not self.isOnCurve(G):
             raise ValueError("Generator is not on the 'x^3 + a*x + b' curve")
-        self.G = int(G[0]), int(G[1])
+        self.G = G
 
         # 5. Check that n is prime.
         if n < 2 or (n > 2 and not pow(2, n-1, n) == 1):
@@ -156,17 +161,17 @@ class EC:
         if Q[1] == 0:  # Infinity point in affine coordinates
             return Q
         else:
-            return Q[0], self._p - Q[1]
+            return Point(Q[0], self._p - Q[1])
 
     def _affine_from_jac(self, Q: _JacPoint) -> Point:
         # point is assumed to be on curve
         if Q[2] == 0:  # Infinity point in Jacobian coordinates
-            return 1, 0
+            return Point()
         else:
             Z2 = Q[2]*Q[2]
             x = (Q[0]*mod_inv(Z2, self._p)) % self._p
             y = (Q[1]*mod_inv(Z2*Q[2], self._p)) % self._p
-            return x, y
+            return Point(x, y)
 
     # methods using _a, _b, _p
 
@@ -190,9 +195,9 @@ class EC:
                 X = (W*W - 2*V) % self._p
                 Y = (W*(V - X) - 8*QY2*QY2) % self._p
                 Z = (2*Q[1]*Q[2]) % self._p
-                return X, Y, Z
+                return _JacPoint(X, Y, Z)
             else:                                        # opposite points
-                return 1, 1, 0
+                return _JacPoint()
         else:
             T = (Q[1]*RZ3) % self._p
             U = (R[1]*QZ3) % self._p
@@ -208,7 +213,7 @@ class EC:
             X = (W*W - V3 - 2*MV2) % self._p
             Y = (W*(MV2 - X) - T*V3) % self._p
             Z = (V*Q[2]*R[2]) % self._p
-            return X, Y, Z
+            return _JacPoint(X, Y, Z)
 
     def _addAffine(self, Q: Point, R: Point) -> Point:
         # points are assumed to be on curve
@@ -222,14 +227,14 @@ class EC:
                        mod_inv(2*Q[1], self._p)) % self._p
             else:  # must be opposite (points already checked to be on curve)
                 # elif R[1] == self._p - Q[1]: # opposite points
-                return 1, 0
+                return Point()
             # else:
             #    raise ValueError("points are not on the same curve")
         else:
             lam = ((R[1]-Q[1]) * mod_inv(R[0]-Q[0], self._p)) % self._p
         x = (lam*lam-Q[0]-R[0]) % self._p
         y = (lam*(Q[0]-x)-Q[1]) % self._p
-        return x, y
+        return Point(x, y)
 
     def add(self, Q1: Point, Q2: Point) -> Point:
         self.requireOnCurve(Q1)
@@ -316,7 +321,7 @@ def _pointMultAffine(ec: EC, n: int, Q: Point) -> Point:
     # private method does not check input
     if Q[1] == 0:  # Infinity point in affine coordinates
         return Q
-    R = 1, 0      # initialize as infinity point
+    R = Point()      # initialize as infinity point
     while n > 0:  # use binary representation of n
         if n & 1:  # if least significant bit is 1 then add current Q
             R = ec.add(R, Q)
@@ -333,8 +338,8 @@ def _pointMultJacobian(ec: EC, n: int, Q: _JacPoint) -> _JacPoint:
     """
     # private method does not check input
     if Q[2] == 0:  # Infinity point in Jacobian coordinates
-        return 1, 1, 0
-    R = 1, 1, 0   # initialize as infinity point
+        return _JacPoint()
+    R = _JacPoint()   # initialize as infinity point
     while n > 0:  # use binary representation of n
         if n & 1:  # if least significant bit is 1 then add current Q
             R = ec._addJacobian(R, Q)
@@ -349,7 +354,7 @@ def DblScalarMult(ec: EC, u: int, Q: Point, v: int, P: Point) -> Point:
 
     if u == 0:
         if v == 0:
-            return 1, 0
+            return Point()
         ec.requireOnCurve(P)
         PJ = _jac_from_aff(P)
         v %= ec.n
@@ -379,7 +384,7 @@ def DblScalarMult(ec: EC, u: int, Q: Point, v: int, P: Point) -> Point:
     v %= ec.n
     PJ = _jac_from_aff(P)
 
-    R = 1, 1, 0  # initialize as infinity point
+    R = _JacPoint()  # initialize as infinity point
     msb = max(u.bit_length(), v.bit_length())
     while msb > 0:
         if u >> (msb - 1):  # checking msb

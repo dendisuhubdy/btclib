@@ -155,7 +155,7 @@ def _ecssa_pubkey_recovery(ec: EC, hf, e: int, sig: ECSS) -> Point:
     r, s = to_ssasig(ec, sig)
 
     # could be obtained from to_ssasig...
-    K = r, ec.yQuadraticResidue(r, True)
+    K = Point(r, ec.yQuadraticResidue(r, True))
 
     if e == 0:
         raise ValueError("invalid (zero) challenge e")
@@ -213,7 +213,7 @@ def ecssa_batch_validation(ec: EC,
         y = ec.y(r)  # raises an error if y does not exist
 
         mult += a[i] * s % ec.n
-        points.append(_jac_from_aff((r, y)))
+        points.append(_jac_from_aff(Point(r, y)))
         factors.append(a[i])
         points.append(_jac_from_aff(P[i]))
         factors.append(a[i] * e % ec.n)

@@ -13,7 +13,7 @@ import random
 from hashlib import sha256 as hf
 
 from btclib.numbertheory import mod_inv, legendre_symbol
-from btclib.ec import pointMult, DblScalarMult
+from btclib.ec import Point, pointMult, DblScalarMult
 from btclib.ecurves import secp256k1 as ec
 from btclib.ecutils import octets2int, point2octets, bits2int
 from btclib.pedersen import secondGenerator
@@ -98,14 +98,14 @@ class TestEcssa2(unittest.TestCase):
             alpha13_prime += (f1_prime[i] * pow(3, i)) % ec.n
 
         # player two verifies consistency of his share
-        RHS = 1, 0
+        RHS = Point()
         for i in range(t):
             RHS = ec.add(RHS, pointMult(ec, pow(2, i), commits1[i]))
         assert DblScalarMult(
             ec, alpha12, ec.G, alpha12_prime, H) == RHS, 'player one is cheating'
 
         # player three verifies consistency of his share
-        RHS = 1, 0
+        RHS = Point()
         for i in range(t):
             RHS = ec.add(RHS, pointMult(ec, pow(3, i), commits1[i]))
         assert DblScalarMult(
@@ -152,13 +152,13 @@ class TestEcssa2(unittest.TestCase):
             alpha23_prime += (f2_prime[i] * pow(3, i)) % ec.n
 
         # player one verifies consistency of his share
-        RHS = 1, 0
+        RHS = Point()
         for i in range(t):
             RHS = ec.add(RHS, pointMult(ec, pow(1, i), commits2[i]))
         assert DblScalarMult(ec, alpha21, ec.G, alpha21_prime, H) == RHS, 'player two is cheating'
 
         # player three verifies consistency of his share
-        RHS = 1, 0
+        RHS = Point()
         for i in range(t):
             RHS = ec.add(RHS, pointMult(ec, pow(3, i), commits2[i]))
         assert DblScalarMult(ec, alpha23, ec.G, alpha23_prime, H) == RHS, 'player two is cheating'
@@ -204,13 +204,13 @@ class TestEcssa2(unittest.TestCase):
             alpha32_prime += (f3_prime[i] * pow(2, i)) % ec.n
 
         # player one verifies consistency of his share
-        RHS = 1, 0
+        RHS = Point()
         for i in range(t):
             RHS = ec.add(RHS, pointMult(ec, pow(1, i), commits3[i]))
         assert DblScalarMult(ec, alpha31, ec.G, alpha31_prime, H) == RHS, 'player three is cheating'
 
         # player two verifies consistency of his share
-        RHS = 1, 0
+        RHS = Point()
         for i in range(t):
             RHS = ec.add(RHS, pointMult(ec, pow(2, i), commits3[i]))
         assert DblScalarMult(ec, alpha32, ec.G, alpha32_prime, H) == RHS, 'player two is cheating'
@@ -239,8 +239,8 @@ class TestEcssa2(unittest.TestCase):
 
         # he checks the others' values
         # player one
-        RHS2 = 1, 0
-        RHS3 = 1, 0
+        RHS2 = Point()
+        RHS3 = Point()
         for i in range(t):
             RHS2 = ec.add(RHS2, pointMult(ec, pow(1, i), A2[i]))
             RHS3 = ec.add(RHS3, pointMult(ec, pow(1, i), A3[i]))
@@ -248,8 +248,8 @@ class TestEcssa2(unittest.TestCase):
         assert pointMult(ec, alpha31, ec.G) == RHS3, 'player three is cheating'
 
         # player two
-        RHS1 = 1, 0
-        RHS3 = 1, 0
+        RHS1 = Point()
+        RHS3 = Point()
         for i in range(t):
             RHS1 = ec.add(RHS1, pointMult(ec, pow(2, i), A1[i]))
             RHS3 = ec.add(RHS3, pointMult(ec, pow(2, i), A3[i]))
@@ -257,8 +257,8 @@ class TestEcssa2(unittest.TestCase):
         assert pointMult(ec, alpha32, ec.G) == RHS3, 'player three is cheating'
 
         # player three
-        RHS1 = 1, 0
-        RHS2 = 1, 0
+        RHS1 = Point()
+        RHS2 = Point()
         for i in range(t):
             RHS1 = ec.add(RHS1, pointMult(ec, pow(3, i), A1[i]))
             RHS2 = ec.add(RHS2, pointMult(ec, pow(3, i), A2[i]))
@@ -311,7 +311,7 @@ class TestEcssa2(unittest.TestCase):
             beta13_prime += (f1_prime[i] * pow(3, i)) % ec.n
 
         # player three verifies consistency of his share
-        RHS = 1, 0
+        RHS = Point()
         for i in range(t):
             RHS = ec.add(RHS, pointMult(ec, pow(3, i), commits1[i]))
         assert DblScalarMult(ec, beta13, ec.G, beta13_prime, H) == RHS, 'player one is cheating'
@@ -351,7 +351,7 @@ class TestEcssa2(unittest.TestCase):
             beta31_prime += (f3_prime[i] * pow(1, i)) % ec.n
 
         # player one verifies consistency of his share
-        RHS = 1, 0
+        RHS = Point()
         for i in range(t):
             RHS = ec.add(RHS, pointMult(ec, pow(1, i), commits3[i]))
         assert DblScalarMult(ec, beta31, ec.G, beta31_prime, H) == RHS, 'player three is cheating'
@@ -376,13 +376,13 @@ class TestEcssa2(unittest.TestCase):
 
         # he checks the others' values
         # player one
-        RHS3 = 1, 0
+        RHS3 = Point()
         for i in range(t):
             RHS3 = ec.add(RHS3, pointMult(ec, pow(1, i), B3[i]))
         assert pointMult(ec, beta31, ec.G) == RHS3, 'player three is cheating'
 
         # player three
-        RHS1 = 1, 0
+        RHS1 = Point()
         for i in range(t):
             RHS1 = ec.add(RHS1, pointMult(ec, pow(3, i), B1[i]))
         assert pointMult(ec, beta13, ec.G) == RHS1, 'player one is cheating'

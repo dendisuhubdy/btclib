@@ -11,15 +11,15 @@
 import unittest
 
 from btclib.numbertheory import mod_sqrt
-from btclib.ec import EC, pointMult, DblScalarMult, \
+from btclib.ec import EC, Point, _JacPoint, pointMult, DblScalarMult, \
     _jac_from_aff, _pointMultJacobian, _pointMultAffine
 from btclib.ecurves import secp256k1, secp256r1, secp384r1, secp160r1, \
     secp112r1, all_curves, low_card_curves, ec23_31
 from btclib.ecutils import point2octets, octets2point
 
  
-Inf = 1, 0  # Infinity point in affine coordinates
-InfJ = 1, 1, 0  # Infinity point in jacobian coordinates
+Inf = Point()  # Infinity point in affine coordinates
+InfJ = _JacPoint()  # Infinity point in jacobian coordinates
 
 
 class TestEllipticCurve(unittest.TestCase):
@@ -207,7 +207,7 @@ class TestEllipticCurve(unittest.TestCase):
             # jacobian coordinates
             Qjac = _jac_from_aff(Q)
             minus_Qjac = _jac_from_aff(minus_Q)
-            self.assertEqual(ec._addJacobian(Qjac, minus_Qjac), (1, 1, 0))
+            self.assertEqual(ec._addJacobian(Qjac, minus_Qjac), _JacPoint())
 
             # opposite of Inf is Inf
             Q = Inf
