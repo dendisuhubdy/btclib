@@ -15,9 +15,7 @@ transaction and block parsing (explorer based with optional full node)
 remove _pointMultJacobian from batch validation ?
 BUG in batch validation with just one sig (plus why a[0]=1 ?)
 
-allow hexstring for Signature
-allow binary Signature
-run scripts as part of test-suite
+allow hexstring/binary Signature
 revise ecssa_pubkey_recovery
 the name of functions returning bool should be a question
 
@@ -26,7 +24,7 @@ crack https://bitcoinmagazine.com/articles/deterministic-wallets-advantages-flaw
 document bitcoin core derivation path vs Electrum (standard / segwit) vs ledger
 
 how to export mprv from Electrum?
-    verify if first wif is that
+    verify if first wif is mprv
 
 better mimic of electrum entropy search, they probably have the words inverted
 

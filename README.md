@@ -26,7 +26,7 @@ The library includes:
 - elliptic curve class
   - fast algebra implemented using Jacobian coordinates
   - double scalar multiplication (Shamir's trick)
-  - point simmetry solution: odd/even, high/low, and quadratic residue
+  - point simmetry solutions: odd/even, high/low, and quadratic residue
   - available curves: SEC 1 v1 and v2, NIST, Brainpool, and low cardinality test curves
 - ECDSA signature and DER encoding
 - EC sign-to-contract notarization
